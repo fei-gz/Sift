@@ -1,7 +1,5 @@
 {
   "name": "Sieve & Stones",
   "description": "A high-fidelity 3D physics-based sifting game. Use your device's gyroscope to tilt the sieve, gather ancient stones, and sift away the unwanted beans.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "requestFramePermissions": []
 }

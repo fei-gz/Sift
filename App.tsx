@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Play, Trophy, RotateCcw, ShieldCheck, Loader2 } from 'lucide-react';
 import Game from './components/Game';
@@ -23,16 +22,22 @@ const App: React.FC = () => {
     setIsAuthorizing(true);
     
     try {
+      // iOS 13+ requires explicit permission for DeviceOrientation
       const DeviceOrientation = (window as any).DeviceOrientationEvent;
       if (DeviceOrientation && typeof DeviceOrientation.requestPermission === 'function') {
         const response = await DeviceOrientation.requestPermission();
         console.log('Permission response:', response);
+      } else {
+        console.log('DeviceOrientation permission API not found, assuming granted or not needed.');
       }
     } catch (e) {
       console.warn('Orientation permission failed or not required:', e);
     } finally {
-      setIsAuthorizing(false);
-      startGame();
+      // Small delay to ensure state updates don't clash with hardware requests
+      setTimeout(() => {
+        setIsAuthorizing(false);
+        startGame();
+      }, 100);
     }
   };
 
