@@ -6,18 +6,24 @@ export const useGyro = (active: boolean) => {
   useEffect(() => {
     if (!active) return;
 
+    // 默认倾斜角（用户通常以一定角度握持手机）
+    const DEFAULT_BETA = 45; 
+
     const handleOrientation = (event: DeviceOrientationEvent) => {
-      const { beta, gamma } = event;
+      let { beta, gamma } = event;
       if (beta === null || gamma === null) return;
 
-      // Map gyro angles to reasonable tilt values for the game
-      // beta is front-to-back tilt [-180, 180]
-      // gamma is left-to-right tilt [-90, 90]
-      
-      const x = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(beta - 45), -0.7, 0.7);
-      const z = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(-gamma), -0.7, 0.7);
+      // 针对横竖屏或握持姿势进行平滑处理
+      // 限制倾斜范围，防止物理模型过度翻转
+      const targetX = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(beta - DEFAULT_BETA), -0.7, 0.7);
+      const targetZ = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(-gamma), -0.7, 0.7);
 
-      (window as any)._globalTilt = { x, z };
+      // 使用简单的指数平滑减缓抖动
+      const current = (window as any)._globalTilt || { x: 0, z: 0 };
+      (window as any)._globalTilt = {
+        x: current.x + (targetX - current.x) * 0.2,
+        z: current.z + (targetZ - current.z) * 0.2
+      };
     };
 
     window.addEventListener('deviceorientation', handleOrientation);
